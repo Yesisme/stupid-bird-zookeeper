@@ -9,7 +9,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.lym.zk</groupId>
-	<artifactId>zookeeper-lym</artifactId>
+	<artifactId>stupidBird-zookeeper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>stupidbird-zookeeper</name>
 	<description>zookeeper-demo</description>
