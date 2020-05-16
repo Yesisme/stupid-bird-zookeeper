@@ -1,18 +1,19 @@
-package com.lym.zk;
+package com.lym.zk.mapper;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class StupidbirdZookeeperApplicationTests {
+@Slf4j
+public class OrderItemMapperTest {
 
-	@Test
-	public void contextLoads() {
-
-	}
+    @Autowired
+    private OrderItemMapper orderItemMapper;
 
 
 }
