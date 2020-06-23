@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +26,9 @@ public class orderController {
     @Autowired
     private RedissonClient redissonClient;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @PostMapping
     @RequestMapping("/stock")
     public void order(@RequestParam("id") int id){
@@ -33,16 +37,17 @@ public class orderController {
         RLock lock = redissonClient.getLock(String.valueOf(id));
         try {
             if(getLock=lock.tryLock(0,60, TimeUnit.SECONDS)){
-                log.info(uniqueId+"用户获取到锁{}","####################");
-                int count = orderItemService.queryStockById(id);
-                if(count>0){
-                    log.info(uniqueId+"用户获取到第{}手机",+count);
-                    count=count-1;
-                    orderItemService.updateStockById(count,id);
-                }else {
-                    log.info(uniqueId+"不好意思手机被抢光了{}","===============");
+                if(!Thread.currentThread().isInterrupted()){
+                    log.info(uniqueId+"用户获取到锁{}","####################");
+                    int count = orderItemService.queryStockById(id);
+                    if(count>0){
+                        log.info(uniqueId+"用户获取到第{}手机",+count);
+                        count=count-1;
+                        orderItemService.updateStockById(count,id);
+                    }else {
+                        log.info(uniqueId+"不好意思手机被抢光了{}","===============");
+                    }
                 }
-
             }else{
                 log.info(uniqueId+"用户未获取到锁{}","---------------");
             }
@@ -52,8 +57,10 @@ public class orderController {
             if(!getLock){
                 return;
             }
-            log.info(uniqueId+"用户释放了锁{}","####################");
-            lock.unlock();
+            if(!Thread.currentThread().isInterrupted()){
+                log.info(uniqueId+"用户释放了锁{}","####################");
+                lock.unlock();
+            }
         }
     }
 
@@ -61,6 +68,5 @@ public class orderController {
     public static String getUUID(){
         String uniqueId = UUID.randomUUID().toString();
         return uniqueId.substring(uniqueId.lastIndexOf("-")+1, uniqueId.length());
-
     }
 }

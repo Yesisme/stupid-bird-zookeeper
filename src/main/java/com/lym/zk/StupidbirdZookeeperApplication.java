@@ -11,7 +11,5 @@ public class StupidbirdZookeeperApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(StupidbirdZookeeperApplication.class, args);
-
 	}
-
 }

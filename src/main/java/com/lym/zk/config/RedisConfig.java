@@ -47,6 +47,9 @@ public class RedisConfig {
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         StringRedisTemplate redisTemplate = new StringRedisTemplate();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
+        FastJsonRedisSerializer<Object> fastJsonRedisSerializer =
+                new FastJsonRedisSerializer<>(Object.class);
+        setSerialize(redisTemplate, fastJsonRedisSerializer);
         return redisTemplate;
     }
 
@@ -99,7 +102,8 @@ public class RedisConfig {
     @ConditionalOnProperty(prefix = "spring.redis", name = "enable-sentinel", havingValue = "true")
     public RedissonClient redissonSentinelClient(RedisProperties redisProperties) {
         Config config = new Config();
-        SentinelServersConfig sentinelServersConfig = config.useSentinelServers();
+        SentinelServersConfig sentinelServersConfig = config.
+                useSentinelServers();
 
         List<String> node = redisProperties.getSentinel().getNodes();
 
