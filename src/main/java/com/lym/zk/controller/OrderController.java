@@ -1,6 +1,7 @@
 package com.lym.zk.controller;
 
 import com.lym.zk.service.impl.OrderItemServiceImpl;
+import com.lym.zk.utils.ZkLockUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("order")
 @Slf4j
-public class orderController {
+public class OrderController {
 
 
     @Autowired
@@ -29,8 +30,10 @@ public class orderController {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    ZkLockUtil zkLockUtil = new ZkLockUtil();
+
     @PostMapping
-    @RequestMapping("/stock")
+    @RequestMapping("/restock")
     public void order(@RequestParam("id") int id){
         String uniqueId = getUUID();
         boolean getLock =false;
@@ -60,6 +63,31 @@ public class orderController {
             if(!Thread.currentThread().isInterrupted()){
                 log.info(uniqueId+"用户释放了锁{}","####################");
                 lock.unlock();
+            }
+        }
+    }
+
+    @PostMapping
+    @RequestMapping("/stock")
+    public void zkOrder(@RequestParam("id") int id){
+        try {
+            zkLockUtil.acquireLock();
+            String uniqueId = getUUID();
+            int count = orderItemService.queryStockById(id);
+            if(count>0){
+                log.info(uniqueId+"用户获取到第{}电脑",+count);
+                count=count-1;
+                orderItemService.updateStockById(count,id);
+            }else {
+                log.info(uniqueId+"不好意思电脑被抢光了{}","===============");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                zkLockUtil.releaselock();
+            } catch (Exception e) {
+                log.info(e.getMessage(),e);
             }
         }
     }

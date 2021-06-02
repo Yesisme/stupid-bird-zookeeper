@@ -102,11 +102,6 @@ public class RedisConfig {
     @ConditionalOnProperty(prefix = "spring.redis", name = "enable-sentinel", havingValue = "true")
     public RedissonClient redissonSentinelClient(RedisProperties redisProperties) {
         Config config = new Config();
-        SentinelServersConfig sentinelServersConfig = config.
-                useSentinelServers();
-
-        List<String> node = redisProperties.getSentinel().getNodes();
-
         String[] nodes = redisProperties.getSentinel().getNodes().toArray(new String[0]);
 
         List<String> newNodes = new ArrayList<>(nodes.length);
